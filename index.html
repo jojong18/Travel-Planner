@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>iOS Planner App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <!-- iOS-style font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gradient-to-b from-sky-200 to-indigo-200 min-h-screen flex items-center justify-center font-[Inter]">
+
+  <!-- Phone Frame -->
+  <div id="app" class="w-full max-w-sm h-[760px] bg-white rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-sky-500 to-indigo-500 text-white text-center py-6">
+      <h1 class="text-xl font-bold">My Life Planner</h1>
+      <p class="text-sm opacity-90">Organize your day</p>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="flex gap-2 p-3 bg-white shadow-sm">
+      <button v-for="tab in tabs"
+        :key="tab"
+        @click="activeTab = tab"
+        class="flex-1 py-2 rounded-full text-sm font-semibold transition"
+        :class="activeTab === tab 
+          ? 'bg-sky-500 text-white shadow' 
+          : 'bg-sky-100 text-sky-500'">
+        {{ tab }}
+      </button>
+    </nav>
+
+    <!-- Content -->
+    <main class="flex-1 overflow-y-auto p-4 space-y-5 bg-sky-50">
+
+      <!-- Schedule -->
+      <section v-if="activeTab === 'Schedule'" class="bg-white p-4 rounded-2xl shadow">
+        <h2 class="text-sky-500 font-bold mb-3">📅 Schedule</h2>
+        <input v-model="newEvent" placeholder="Add event"
+          class="w-full border rounded-xl p-3 mb-2" />
+        <button @click="addEvent"
+          class="w-full bg-gradient-to-r from-sky-400 to-indigo-400 text-white rounded-xl py-3 font-semibold">
+          Add Event
+        </button>
+        <ul class="mt-3 space-y-2">
+          <li v-for="(event, i) in schedule" :key="i"
+            class="bg-sky-100 p-3 rounded-xl">
+            {{ event }}
+          </li>
+        </ul>
+      </section>
+
+      <!-- Map -->
+      <section v-if="activeTab === 'Map'" class="bg-white p-4 rounded-2xl shadow">
+        <h2 class="text-indigo-500 font-bold mb-3">🗺 Map</h2>
+        <a href="https://www.google.com/maps" target="_blank"
+          class="block bg-gradient-to-r from-indigo-400 to-sky-400 text-white text-center py-4 rounded-xl font-semibold">
+          Open Google Maps
+        </a>
+      </section>
+
+      <!-- Budget -->
+      <section v-if="activeTab === 'Budget'" class="bg-white p-4 rounded-2xl shadow">
+        <h2 class="text-rose-500 font-bold mb-3">💰 Budget</h2>
+        <input type="number" v-model.number="expense"
+          placeholder="Enter amount"
+          class="w-full border rounded-xl p-3 mb-2" />
+        <button @click="addExpense"
+          class="w-full bg-gradient-to-r from-rose-400 to-pink-400 text-white rounded-xl py-3 font-semibold">
+          Add Expense
+        </button>
+        <p class="mt-4 text-gray-600">
+          Total Spent:
+          <span class="font-bold text-rose-500">${{ total }}</span>
+        </p>
+      </section>
+
+      <!-- Shopping -->
+      <section v-if="activeTab === 'Shopping'" class="bg-white p-4 rounded-2xl shadow">
+        <h2 class="text-teal-500 font-bold mb-3">🛒 Shopping</h2>
+        <input v-model="newItem"
+          placeholder="Add item"
+          class="w-full border rounded-xl p-3 mb-2" />
+        <button @click="addItem"
+          class="w-full bg-gradient-to-r from-teal-400 to-emerald-400 text-white rounded-xl py-3 font-semibold">
+          Add Item
+        </button>
+        <ul class="mt-3 space-y-2">
+          <li v-for="(item, i) in shopping" :key="i"
+            class="bg-teal-100 p-3 rounded-xl">
+            {{ item }}
+          </li>
+        </ul>
+      </section>
+
+      <!-- Bookings -->
+      <section v-if="activeTab === 'Bookings'" class="bg-white p-4 rounded-2xl shadow">
+        <h2 class="text-indigo-500 font-bold mb-3">🍽 Bookings</h2>
+        <input v-model="booking"
+          placeholder="Restaurant name"
+          class="w-full border rounded-xl p-3 mb-2" />
+        <button @click="addBooking"
+          class="w-full bg-gradient-to-r from-indigo-400 to-purple-400 text-white rounded-xl py-3 font-semibold">
+          Book Table
+        </button>
+        <ul class="mt-3 space-y-2">
+          <li v-for="(b, i) in bookings" :key="i"
+            class="bg-indigo-100 p-3 rounded-xl">
+            {{ b }}
+          </li>
+        </ul>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Vue -->
+  <script>
+    const { createApp } = Vue
+
+    createApp({
+      data() {
+        return {
+          tabs: ['Schedule', 'Map', 'Budget', 'Shopping', 'Bookings'],
+          activeTab: 'Schedule',
+          schedule: [],
+          newEvent: '',
+          expense: 0,
+          total: 0,
+          shopping: [],
+          newItem: '',
+          bookings: [],
+          booking: ''
+        }
+      },
+      methods: {
+        addEvent() {
+          if (this.newEvent) {
+            this.schedule.push(this.newEvent)
+            this.newEvent = ''
+          }
+        },
+        addExpense() {
+          if (this.expense > 0) {
+            this.total += this.expense
+            this.expense = 0
+          }
+        },
+        addItem() {
+          if (this.newItem) {
+            this.shopping.push(this.newItem)
+            this.newItem = ''
+          }
+        },
+        addBooking() {
+          if (this.booking) {
+            this.bookings.push(this.booking)
+            this.booking = ''
+          }
+        }
+      }
+    }).mount('#app')
+  </script>
+
+</body>
+</html>
